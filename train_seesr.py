@@ -993,6 +993,7 @@ for epoch in range(first_epoch, args.num_train_epochs):
             # extract soft semantic label
             with torch.no_grad():
                 ram_image = batch["ram_values"].to(accelerator.device, dtype=weight_dtype)
+                # 首先通过一个swin transformer块 图像变成B L C 然后一个投影块变成 B L 512
                 ram_encoder_hidden_states = RAM.generate_image_embeds(ram_image)
 
             down_block_res_samples, mid_block_res_sample = controlnet(
