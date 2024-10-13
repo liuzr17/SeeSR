@@ -67,9 +67,10 @@ def load_state_dict_diffbirSwinIR(model: nn.Module, state_dict: Mapping[str, Any
     
     model.load_state_dict(state_dict, strict=strict)
 
-
+# 加载seesr自定义的pipeline
 def load_seesr_pipeline(args, accelerator, enable_xformers_memory_efficient_attention):
-    
+
+  # 自定义unet和controlnet
     from models.controlnet import ControlNetModel
     from models.unet_2d_condition import UNet2DConditionModel
 
@@ -120,6 +121,7 @@ def load_seesr_pipeline(args, accelerator, enable_xformers_memory_efficient_atte
 
     return validation_pipeline
 
+# 加载文本tag模型recognize anything
 def load_tag_model(args, device='cuda'):
     
     model = ram(pretrained='preset/models/ram_swin_large_14m.pth',
@@ -130,7 +132,8 @@ def load_tag_model(args, device='cuda'):
     model.to(device)
     
     return model
-    
+
+# 通过ram模型获得文本tag和表示向量
 def get_validation_prompt(args, image, model, device='cuda'):
     validation_prompt = ""
  
@@ -214,6 +217,7 @@ def main(args, enable_xformers_memory_efficient_attention=True,):
 
             for sample_idx in range(args.sample_times):  
                 with torch.autocast("cuda"):
+                  # 条件有prompt(包含tag),低分辨率图像,ram模型提取出的表示向量
                     image = pipeline(
                             validation_prompt, validation_image, num_inference_steps=args.num_inference_steps, generator=generator, height=height, width=width,
                             guidance_scale=args.guidance_scale, negative_prompt=negative_prompt, conditioning_scale=args.conditioning_scale,
